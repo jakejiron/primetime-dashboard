@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,8 +8,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;font-size:15px;background:#f0f2f5;color:#111827;min-height:100vh}
-
-/* HEADER */
 header{background:#1e293b;padding:0 28px;display:flex;align-items:center;gap:16px;height:64px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
 .logo{background:#2563eb;color:#fff;font-size:12px;font-weight:700;letter-spacing:.08em;padding:5px 12px;border-radius:5px}
 .hdiv{width:1px;height:24px;background:#334155}
@@ -21,20 +18,13 @@ nav{display:flex;gap:6px;margin:0 auto;background:#0f172a;padding:6px;border-rad
 .tab:hover{background:#334155;color:#f1f5f9;border-color:#475569}
 .tab.active{background:#2563eb;color:#fff;border-color:#3b82f6;box-shadow:0 2px 8px rgba(37,99,235,0.4)}
 .updated{font-family:'IBM Plex Mono',monospace;font-size:12px;color:#94a3b8;padding-left:12px;border-left:1px solid #334155;white-space:nowrap}
-
-/* LAYOUT */
 main{padding:24px 28px;max-width:1440px}
 .view{display:none}.view.active{display:block}
 .sec{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#374151;margin-bottom:12px;display:flex;align-items:center;gap:10px}
 .sec::after{content:'';flex:1;height:1px;background:#e2e5ea}
-
-/* ALERT */
 .alert-banner{background:#fff1f1;border:1.5px solid #fca5a5;border-radius:10px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:flex-start;gap:12px}
-.alert-icon{font-size:20px;line-height:1}
 .alert-title{font-size:15px;font-weight:700;color:#b91c1c;margin-bottom:3px}
 .alert-sub{font-size:13px;color:#374151}
-
-/* PAR CARDS */
 .par-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px}
 .par-card{border-radius:10px;padding:20px;border:1.5px solid;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .par-card.green{background:#f0fdf4;border-color:#86efac}
@@ -57,8 +47,6 @@ main{padding:24px 28px;max-width:1440px}
 .green .par-bar-fill{background:#22c55e}.yellow .par-bar-fill{background:#f59e0b}.red .par-bar-fill{background:#ef4444}
 .par-action{font-size:13px;font-weight:700}
 .green .par-action{color:#15803d}.yellow .par-action{color:#92400e}.red .par-action{color:#b91c1c}
-
-/* TABLES */
 .table-wrap{background:#fff;border:1px solid #e2e5ea;border-radius:10px;overflow:hidden;margin-bottom:24px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 table{width:100%;border-collapse:collapse}
 thead{background:#1e293b}
@@ -85,8 +73,6 @@ td.dim{color:#9ca3af}
 .pill-green{background:#dcfce7;color:#15803d;border:1.5px solid #86efac}
 .chips{display:flex;flex-wrap:wrap;gap:5px}
 .sku-chip{display:inline-block;padding:4px 10px;border-radius:5px;background:#eff6ff;border:1px solid #bfdbfe;font-size:12px;color:#1d4ed8;font-weight:600}
-
-/* INV CARDS */
 .inv-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
 .inv-card{background:#fff;border:1px solid #e2e5ea;border-radius:10px;padding:16px;border-left:4px solid #2563eb}
 .inv-card.green{border-left-color:#22c55e}.inv-card.yellow{border-left-color:#f59e0b}.inv-card.red{border-left-color:#ef4444}
@@ -94,6 +80,9 @@ td.dim{color:#9ca3af}
 .inv-qty{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;line-height:1;margin-bottom:6px}
 .inv-card.green .inv-qty{color:#15803d}.inv-card.yellow .inv-qty{color:#92400e}.inv-card.red .inv-qty{color:#b91c1c}
 .inv-detail{font-size:13px;color:#374151;font-weight:500}
+.loading{text-align:center;padding:60px;color:#6b7280;font-size:15px}
+.spinner{display:inline-block;width:24px;height:24px;border:3px solid #e2e5ea;border-top-color:#2563eb;border-radius:50%;animation:spin .8s linear infinite;margin-right:10px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -108,341 +97,295 @@ td.dim{color:#9ca3af}
     <div class="tab" onclick="show('inventory',this)">Inventory</div>
     <div class="tab" onclick="show('shipped',this)">Shipped</div>
   </nav>
-  <div class="updated">Jun 15, 2026 · 3:19 PM</div>
+  <div class="updated" id="last-updated">Loading...</div>
 </header>
 
 <main>
-
-<!-- ── PRODUCTION / PAR ── -->
-<div class="view active" id="view-production">
-  <div id="alert-area"></div>
-  <div class="sec">PAR Status — Post-Commitment Buffer Target</div>
-  <div class="par-grid" id="par-grid"></div>
-  <div class="sec">Production Need Detail</div>
-  <div class="table-wrap">
-    <table>
+  <div class="view active" id="view-production">
+    <div id="alert-area"></div>
+    <div class="sec">PAR Status — Post-Commitment Buffer Target</div>
+    <div class="par-grid" id="par-grid"><div class="loading"><span class="spinner"></span>Loading live data...</div></div>
+    <div class="sec">Production Need Detail</div>
+    <div class="table-wrap"><table>
       <thead><tr>
-        <th>Product</th>
-        <th class="r">On Hand</th>
-        <th class="r">Committed (POs)</th>
-        <th class="r">Available</th>
-        <th class="r">PAR Buffer</th>
-        <th class="r">Produce Now</th>
+        <th>Product</th><th class="r">On Hand</th><th class="r">Committed (POs)</th>
+        <th class="r">Available</th><th class="r">PAR Buffer</th><th class="r">Produce Now</th>
       </tr></thead>
-      <tbody id="par-table"></tbody>
-    </table>
+      <tbody id="par-table"><tr><td colspan="6" class="loading"><span class="spinner"></span>Loading...</td></tr></tbody>
+    </table></div>
   </div>
-</div>
 
-<!-- ── OPEN ORDERS ── -->
-<div class="view" id="view-orders">
-  <div class="sec">Open Purchase Orders</div>
-  <div class="table-wrap">
-    <table>
+  <div class="view" id="view-orders">
+    <div class="sec">Open Purchase Orders</div>
+    <div class="table-wrap"><table>
       <thead><tr>
-        <th>PO Number</th><th>Region</th><th>Delivery</th>
-        <th class="r">Cases</th><th class="r">Ciabatta</th><th class="r">Pret Roll</th>
-        <th class="r">Dutch Crunch</th><th class="r">LG Sourdough</th><th class="r">SM Sourdough</th>
+        <th>PO Number</th><th>Region</th><th>Delivery</th><th class="r">Cases</th>
+        <th class="r">Ciabatta</th><th class="r">Pret Roll</th><th class="r">Dutch Crunch</th>
+        <th class="r">LG Sourdough</th><th class="r">SM Sourdough</th>
       </tr></thead>
-      <tbody id="orders-table"></tbody>
-    </table>
+      <tbody id="orders-table"><tr><td colspan="9" class="loading"><span class="spinner"></span>Loading...</td></tr></tbody>
+    </table></div>
   </div>
-</div>
 
-<!-- ── INVENTORY ── -->
-<div class="view" id="view-inventory">
-  <div class="sec">Current Stock by SKU</div>
-  <div class="inv-grid" id="inv-grid"></div>
-  <div class="sec">Lot-Level Detail</div>
-  <div class="table-wrap">
-    <table>
+  <div class="view" id="view-inventory">
+    <div class="sec">Current Stock by SKU</div>
+    <div class="inv-grid" id="inv-grid"><div class="loading"><span class="spinner"></span>Loading...</div></div>
+    <div class="sec">Lot-Level Detail</div>
+    <div class="table-wrap"><table>
       <thead><tr>
         <th>SKU</th><th>Product</th><th class="r">Units</th><th>Lot #</th><th>Received</th><th>Location</th>
       </tr></thead>
-      <tbody id="inv-table"></tbody>
-    </table>
+      <tbody id="inv-table"><tr><td colspan="6" class="loading"><span class="spinner"></span>Loading...</td></tr></tbody>
+    </table></div>
   </div>
-</div>
 
-<!-- ── SHIPPED ── -->
-<div class="view" id="view-shipped">
-  <div class="sec">Shipped Orders — Jun 1–11, 2026</div>
-  <div class="table-wrap">
-    <table>
+  <div class="view" id="view-shipped">
+    <div class="sec">Shipped Orders</div>
+    <div class="table-wrap"><table>
       <thead><tr>
         <th>Reference</th><th>PO Number</th><th>Ship To</th><th>Pickup Date</th>
         <th class="r">Total Qty</th><th>SKUs Shipped</th>
       </tr></thead>
-      <tbody id="shipped-table"></tbody>
-    </table>
+      <tbody id="shipped-table"><tr><td colspan="6" class="loading"><span class="spinner"></span>Loading...</td></tr></tbody>
+    </table></div>
   </div>
-</div>
-
 </main>
 
 <script>
-// ── DATA ──────────────────────────────────────────────────────
+// ── CONFIG ────────────────────────────────────────────────────
+const SHEET_ID = '1O04EUR1SkfvSxN0-Ypf-RL_otcCkhNQdcVTQYg3SiMM';
+const API_KEY  = '';  // Public sheet — no API key needed for CSV export
+
 const SKU_NAMES = {
-  'F-CBCCIAB-BX':'Ciabatta',
-  'F-CBCPRE-BX':'Pretzel Roll',
-  'F-CBCDC-BX':'Dutch Crunch',
-  'F-CBCSDLGL-S':'LG Sourdough',
-  'F-CBCSDSML-S':'SM Sourdough'
+  'F-CBCCIAB-BX':'Ciabatta','F-CBCPRE-BX':'Pretzel Roll','F-CBCDC-BX':'Dutch Crunch',
+  'F-CBCSDLGL-S':'LG Sourdough','F-CBCSDSML-S':'SM Sourdough'
 };
 const SKU_ORDER = ['F-CBCCIAB-BX','F-CBCPRE-BX','F-CBCDC-BX','F-CBCSDLGL-S','F-CBCSDSML-S'];
+const PAR_BUFFER = {'F-CBCCIAB-BX':300,'F-CBCPRE-BX':100,'F-CBCDC-BX':50,'F-CBCSDLGL-S':100,'F-CBCSDSML-S':50};
 
-// On hand (from SoCal_Inventory_6_15.xlsx — confirmed Jun 15, 2026)
-const ON_HAND = {
-  'F-CBCCIAB-BX': 950,
-  'F-CBCPRE-BX':  250,
-  'F-CBCDC-BX':   0,
-  'F-CBCSDLGL-S': 525,
-  'F-CBCSDSML-S': 125
-};
-
-// Post-commitment PAR buffer targets (confirmed Jun 15)
-const PAR_BUFFER = {
-  'F-CBCCIAB-BX': 300,
-  'F-CBCPRE-BX':  100,
-  'F-CBCDC-BX':    50,
-  'F-CBCSDLGL-S': 100,
-  'F-CBCSDSML-S':  50
-};
-
-// Open POs — committed demand
-const OPEN_ORDERS = [
-  {po:'29223280',region:'INTERMOUNTAIN',delivery:'2026-06-19',cases:75, ciab:50, pre:0,  dc:0,  lgs:25, sms:0 },
-  {po:'39394060',region:'ATLANTA',      delivery:'2026-06-25',cases:125,ciab:0,  pre:50, dc:50, lgs:0,  sms:25},
-  {po:'30041070',region:'CENTRAL TEXAS',delivery:'2026-06-24',cases:375,ciab:200,pre:50, dc:50, lgs:50, sms:25},
-  {po:'46580300',region:'LA',           delivery:'2026-06-23',cases:500,ciab:250,pre:50, dc:50, lgs:100,sms:50},
-  {po:'40661590',region:'NORTH TEXAS',  delivery:'2026-06-26',cases:200,ciab:150,pre:0,  dc:0,  lgs:50, sms:0 },
-  {po:'29276010',region:'INTERMOUNTAIN',delivery:'2026-07-03',cases:75, ciab:0,  pre:0,  dc:50, lgs:0,  sms:25},
-];
-
-// Committed = sum of all open PO demand per SKU
-const COMMITTED = {
-  'F-CBCCIAB-BX': 0,'F-CBCPRE-BX': 0,'F-CBCDC-BX': 0,'F-CBCSDLGL-S': 0,'F-CBCSDSML-S': 0
-};
-OPEN_ORDERS.forEach(o => {
-  COMMITTED['F-CBCCIAB-BX'] += o.ciab;
-  COMMITTED['F-CBCPRE-BX']  += o.pre;
-  COMMITTED['F-CBCDC-BX']   += o.dc;
-  COMMITTED['F-CBCSDLGL-S'] += o.lgs;
-  COMMITTED['F-CBCSDSML-S'] += o.sms;
-});
-
-// Available = on hand minus committed
-// Produce Now = PAR buffer minus available (if negative)
-function available(sku){ return ON_HAND[sku] - COMMITTED[sku]; }
-function produceNow(sku){ return Math.max(0, PAR_BUFFER[sku] - available(sku)); }
-function cls(sku){
-  const avail = available(sku), par = PAR_BUFFER[sku];
-  if(avail >= par) return 'green';
-  if(avail >= par * 0.5) return 'yellow';
-  return 'red';
-}
-function badge(sku){
-  const c = cls(sku);
-  return c==='green'?'At PAR':c==='yellow'?'Running Low':'Produce Now';
+// ── FETCH SHEET DATA ─────────────────────────────────────────
+async function fetchSheet(tabName) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
+  const res = await fetch(url);
+  const text = await res.text();
+  return parseCSV(text);
 }
 
-// ── ALERT BANNER ──────────────────────────────────────────────
-const redSkus = SKU_ORDER.filter(s => cls(s) === 'red');
-const yellowSkus = SKU_ORDER.filter(s => cls(s) === 'yellow');
-if(redSkus.length || yellowSkus.length){
-  let msg = '';
-  if(redSkus.length) msg += `<strong>${redSkus.map(s=>SKU_NAMES[s]).join(', ')}</strong> — produce now`;
-  if(redSkus.length && yellowSkus.length) msg += ' &nbsp;·&nbsp; ';
-  if(yellowSkus.length) msg += `<strong>${yellowSkus.map(s=>SKU_NAMES[s]).join(', ')}</strong> — running low`;
-  document.getElementById('alert-area').innerHTML = `
-    <div class="alert-banner">
-      <div class="alert-icon">⚠️</div>
-      <div>
-        <div class="alert-title">Production Alert — ${redSkus.length+yellowSkus.length} SKU${redSkus.length+yellowSkus.length>1?'s':''} need attention</div>
-        <div class="alert-sub">${msg}</div>
-      </div>
-    </div>`;
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.replace(/"/g,'').trim());
+  return lines.slice(1).map(line => {
+    const vals = line.match(/(".*?"|[^,]+|(?<=,)(?=,)|^(?=,)|(?<=,)$)/g) || [];
+    const row = {};
+    headers.forEach((h,i) => { row[h] = (vals[i]||'').replace(/"/g,'').trim(); });
+    return row;
+  }).filter(r => Object.values(r).some(v => v));
 }
 
-// ── PAR CARDS ────────────────────────────────────────────────
-document.getElementById('par-grid').innerHTML = SKU_ORDER.map(sku => {
-  const oh=ON_HAND[sku], com=COMMITTED[sku], avail=available(sku), par=PAR_BUFFER[sku];
-  const need=produceNow(sku), c=cls(sku);
-  const pct=Math.min(100,Math.round(Math.max(0,avail)/par*100));
-  return `<div class="par-card ${c}">
-    <div class="par-badge">${badge(sku)}</div>
-    <div class="par-name">${SKU_NAMES[sku]}</div>
-    <div class="par-sku">${sku}</div>
-    <div class="par-oh-row">
-      <div class="par-oh">${avail}</div>
-      <div class="par-of">/ ${par} PAR</div>
-    </div>
-    <div class="par-meta">${oh} on hand &minus; <strong>${com}</strong> committed</div>
-    <div class="par-bar-bg"><div class="par-bar-fill" style="width:${pct}%"></div></div>
-    <div class="par-action">${need>0?'▲ Produce '+need+' cases':'✓ No production needed'}</div>
-  </div>`;
-}).join('');
-
-// ── PAR TABLE ────────────────────────────────────────────────
-const cMap={green:'#15803d',yellow:'#b45309',red:'#b91c1c'};
-document.getElementById('par-table').innerHTML = SKU_ORDER.map(sku => {
-  const oh=ON_HAND[sku],com=COMMITTED[sku],avail=available(sku),par=PAR_BUFFER[sku],need=produceNow(sku),c=cls(sku);
-  const pillCls = need>0?(avail<0?'pill-red':'pill-yellow'):'pill-green';
-  return `<tr>
-    <td><strong style="font-size:14px">${SKU_NAMES[sku]}</strong> <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b7280;margin-left:6px">${sku}</span></td>
-    <td class="r">${oh}</td>
-    <td class="r" style="color:#b91c1c;font-weight:600">${com}</td>
-    <td class="r" style="font-weight:700;color:${cMap[c]}">${avail}</td>
-    <td class="r" style="color:#6b7280">${par}</td>
-    <td class="r"><span class="pill ${pillCls}">${need>0?need+' cases':'✓ Good'}</span></td>
-  </tr>`;
-}).join('');
-
-// ── OPEN ORDERS TABLE ────────────────────────────────────────
-const TODAY = new Date('2026-06-15');
-function daysUntil(d){ return Math.ceil((new Date(d)-TODAY)/864e5); }
-function fmtDate(d){ const [,m,day]=d.split('-'); return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1]+' '+parseInt(day); }
+// ── HELPERS ──────────────────────────────────────────────────
+function cls(avail, par){ return avail>=par?'green':avail>=par*0.5?'yellow':'red'; }
+function badge(avail, par){ return avail>=par?'At PAR':avail>=par*0.5?'Running Low':'Produce Now'; }
+function fmtDate(d){ 
+  if(!d) return '—';
+  const dt = new Date(d);
+  if(isNaN(dt)) return d;
+  return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][dt.getMonth()]+' '+dt.getDate();
+}
+function daysUntil(d){ return Math.ceil((new Date(d)-new Date())/864e5); }
 function urgCls(d){ const n=daysUntil(d); return n<=7?'urgent':n<=14?'soon':'ok'; }
 function chipCls(d){ const n=daysUntil(d); return n<=7?'chip-urgent':n<=14?'chip-soon':'chip-ok'; }
-function numCell(v){ return v?`<td class="r">${v}</td>`:`<td class="r dim">—</td>`; }
+function numCell(v){ return v&&v!='0'?`<td class="r">${v}</td>`:`<td class="r dim">—</td>`; }
+const cMap={green:'#15803d',yellow:'#92400e',red:'#b91c1c'};
 
-let tot={cases:0,ciab:0,pre:0,dc:0,lgs:0,sms:0};
-const orderRows = OPEN_ORDERS.map(o => {
-  tot.cases+=o.cases;tot.ciab+=o.ciab;tot.pre+=o.pre;tot.dc+=o.dc;tot.lgs+=o.lgs;tot.sms+=o.sms;
-  const d=daysUntil(o.delivery);
-  return `<tr>
-    <td class="po">${o.po}</td>
-    <td><span class="region">${o.region}</span></td>
-    <td><span class="del ${urgCls(o.delivery)}">${fmtDate(o.delivery)}</span><span class="chip ${chipCls(o.delivery)}">${d}d away</span></td>
-    <td class="r" style="font-weight:600">${o.cases}</td>
-    ${numCell(o.ciab)}${numCell(o.pre)}${numCell(o.dc)}${numCell(o.lgs)}${numCell(o.sms)}
-  </tr>`;
-}).join('');
+// ── RENDER ───────────────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const [invRows, orderRows, shippedRows] = await Promise.all([
+      fetchSheet('Inventory'),
+      fetchSheet('Open_Orders'),
+      fetchSheet('Shipped')
+    ]);
 
-document.getElementById('orders-table').innerHTML = orderRows + `
-  <tr class="total-row">
-    <td colspan="3"><span class="total-label">Total Committed</span></td>
-    <td class="r">${tot.cases}</td>
-    <td class="r">${tot.ciab}</td><td class="r">${tot.pre}</td>
-    <td class="r">${tot.dc}</td><td class="r">${tot.lgs}</td><td class="r">${tot.sms}</td>
-  </tr>`;
+    // Aggregate inventory by SKU
+    const ON_HAND = {};
+    SKU_ORDER.forEach(s => ON_HAND[s] = 0);
+    invRows.forEach(r => {
+      if(r['SKU'] && ON_HAND[r['SKU']] !== undefined)
+        ON_HAND[r['SKU']] += parseInt(r['Units']||0);
+    });
 
-// ── INVENTORY CARDS + TABLE ───────────────────────────────────
-const INV_ROWS = [
-  {sku:'F-CBCCIAB-BX',qty:50,lot:'75617',date:'2026-05-15',loc:'A200'},
-  {sku:'F-CBCCIAB-BX',qty:50,lot:'75617',date:'2026-05-15',loc:'A200'},
-  {sku:'F-CBCCIAB-BX',qty:50,lot:'75617',date:'2026-05-15',loc:'A200'},
-  {sku:'F-CBCCIAB-BX',qty:50,lot:'75617',date:'2026-05-15',loc:'A200'},
-  {sku:'F-CBCCIAB-BX',qty:50,lot:'75617',date:'2026-05-15',loc:'A200'},
-  {sku:'F-CBCCIAB-BX',qty:50,lot:'75622',date:'2026-05-18',loc:'A207'},
-  {sku:'F-CBCCIAB-BX',qty:50,lot:'75622',date:'2026-05-18',loc:'A207'},
-  {sku:'F-CBCCIAB-BX',qty:50,lot:'75622',date:'2026-05-18',loc:'A207'},
-  {sku:'F-CBCCIAB-BX',qty:50,lot:'75622',date:'2026-05-18',loc:'A207'},
-  {sku:'F-CBCCIAB-BX',qty:50,lot:'75622',date:'2026-05-18',loc:'A207'},
-  {sku:'F-CBCCIAB-BX',qty:50,lot:'75622',date:'2026-05-18',loc:'A207'},
-  {sku:'F-CBCCIAB-BX',qty:50,lot:'75650',date:'2026-05-28',loc:'A227'},
-  {sku:'F-CBCCIAB-BX',qty:50,lot:'75650',date:'2026-05-28',loc:'A227'},
-  {sku:'F-CBCCIAB-BX',qty:50,lot:'75656',date:'2026-05-29',loc:'A211'},
-  {sku:'F-CBCCIAB-BX',qty:50,lot:'75656',date:'2026-05-29',loc:'A211'},
-  {sku:'F-CBCCIAB-BX',qty:50,lot:'75661',date:'2026-05-29',loc:'A225'},
-  {sku:'F-CBCCIAB-BX',qty:50,lot:'75661',date:'2026-05-29',loc:'A225'},
-  {sku:'F-CBCCIAB-BX',qty:50,lot:'75661',date:'2026-05-29',loc:'A225'},
-  {sku:'F-CBCCIAB-BX',qty:50,lot:'75710',date:'2026-06-12',loc:'A221'},
-  {sku:'F-CBCPRE-BX',qty:50,lot:'75663',date:'2026-06-02',loc:'A227'},
-  {sku:'F-CBCPRE-BX',qty:50,lot:'75670',date:'2026-06-03',loc:'A203'},
-  {sku:'F-CBCPRE-BX',qty:50,lot:'75683',date:'2026-06-08',loc:'A209-B'},
-  {sku:'F-CBCPRE-BX',qty:50,lot:'75703',date:'2026-06-11',loc:'A226'},
-  {sku:'F-CBCPRE-BX',qty:50,lot:'75708',date:'2026-06-12',loc:'A226'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75640',date:'2026-05-26',loc:'A230'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75640',date:'2026-05-26',loc:'A230'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75640',date:'2026-05-26',loc:'A230'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75651',date:'2026-05-28',loc:'A227'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75657',date:'2026-05-29',loc:'A209'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75657',date:'2026-05-29',loc:'A209'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75664',date:'2026-06-02',loc:'A225'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75664',date:'2026-06-02',loc:'A225'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75664',date:'2026-06-02',loc:'A225'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75676',date:'2026-06-04',loc:'A200'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75676',date:'2026-06-04',loc:'A200'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75676',date:'2026-06-04',loc:'A200'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75681',date:'2026-06-05',loc:'A216'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75682',date:'2026-06-08',loc:'A209-B'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75686',date:'2026-06-09',loc:'A204'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75686',date:'2026-06-09',loc:'A204'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75700',date:'2026-06-10',loc:'A220'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75704',date:'2026-06-11',loc:'A216'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75709',date:'2026-06-12',loc:'A204'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75716',date:'2026-06-15',loc:'TBD'},
-  {sku:'F-CBCSDLGL-S',qty:25,lot:'75716',date:'2026-06-15',loc:'TBD'},
-  {sku:'F-CBCSDSML-S',qty:25,lot:'75629',date:'2026-05-19',loc:'A214'},
-  {sku:'F-CBCSDSML-S',qty:25,lot:'75637',date:'2026-05-22',loc:'A209'},
-  {sku:'F-CBCSDSML-S',qty:25,lot:'75641',date:'2026-05-26',loc:'A230'},
-  {sku:'F-CBCSDSML-S',qty:25,lot:'75652',date:'2026-05-28',loc:'A227'},
-  {sku:'F-CBCSDSML-S',qty:25,lot:'75665',date:'2026-06-02',loc:'A218'},
-];
+    // Aggregate committed from open orders
+    const COMMITTED = {};
+    SKU_ORDER.forEach(s => COMMITTED[s] = 0);
+    orderRows.forEach(r => {
+      COMMITTED['F-CBCCIAB-BX'] += parseInt(r['Ciabatta']||0);
+      COMMITTED['F-CBCPRE-BX']  += parseInt(r['Pretzel Roll']||0);
+      COMMITTED['F-CBCDC-BX']   += parseInt(r['Dutch Crunch']||0);
+      COMMITTED['F-CBCSDLGL-S'] += parseInt(r['LG Sourdough']||0);
+      COMMITTED['F-CBCSDSML-S'] += parseInt(r['SM Sourdough']||0);
+    });
 
-// Inventory summary cards
-document.getElementById('inv-grid').innerHTML = SKU_ORDER.map(sku => {
-  const total=ON_HAND[sku], c=cls(sku);
-  const lots=[...new Set(INV_ROWS.filter(r=>r.sku===sku).map(r=>r.lot))].length;
-  return `<div class="inv-card ${c}">
-    <div class="inv-name">${SKU_NAMES[sku]}</div>
-    <div class="inv-qty">${total}</div>
-    <div class="inv-detail">${lots} lot${lots!==1?'s':''} · PAR buffer ${PAR_BUFFER[sku]}</div>
-  </div>`;
-}).join('');
+    // If sheet is empty, fall back to last known data
+    const hasInv = invRows.length > 0;
+    if(!hasInv) {
+      ON_HAND['F-CBCCIAB-BX']=950; ON_HAND['F-CBCPRE-BX']=250;
+      ON_HAND['F-CBCDC-BX']=0; ON_HAND['F-CBCSDLGL-S']=525; ON_HAND['F-CBCSDSML-S']=125;
+    }
+    const hasOrders = orderRows.length > 0;
+    if(!hasOrders) {
+      COMMITTED['F-CBCCIAB-BX']=650; COMMITTED['F-CBCPRE-BX']=150;
+      COMMITTED['F-CBCDC-BX']=200; COMMITTED['F-CBCSDLGL-S']=225; COMMITTED['F-CBCSDSML-S']=125;
+    }
 
-// Inventory lot detail table
-let invRows='';
-SKU_ORDER.forEach(sku => {
-  const rows=INV_ROWS.filter(r=>r.sku===sku);
-  rows.forEach((r,i) => {
-    invRows+=`<tr>
-      ${i===0?`<td rowspan="${rows.length}" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#374151;vertical-align:top;padding-top:14px;border-right:1px solid #f0f2f5">${sku}</td>
-      <td rowspan="${rows.length}" style="font-weight:700;font-size:14px;vertical-align:top;padding-top:14px;border-right:1px solid #f0f2f5">${SKU_NAMES[sku]}</td>`:''}
-      <td class="r" style="font-weight:700">${r.qty}</td>
-      <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#111827">${r.lot}</td>
-      <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#374151">${fmtDate(r.date)}</td>
-      <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#111827">${r.loc}</td>
+    renderPAR(ON_HAND, COMMITTED);
+    renderOrders(orderRows, hasOrders, COMMITTED);
+    renderInventory(invRows, hasInv, ON_HAND);
+    renderShipped(shippedRows);
+
+    document.getElementById('last-updated').textContent = 
+      'Updated: ' + new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+
+  } catch(e) {
+    console.error(e);
+    document.getElementById('par-grid').innerHTML = '<div class="loading">⚠️ Could not load data. Make sure the Google Sheet is set to "Anyone with the link can view".</div>';
+  }
+}
+
+function renderPAR(ON_HAND, COMMITTED) {
+  // Alert banner
+  const redSkus = SKU_ORDER.filter(s => cls(ON_HAND[s]-COMMITTED[s], PAR_BUFFER[s])==='red');
+  const yellowSkus = SKU_ORDER.filter(s => cls(ON_HAND[s]-COMMITTED[s], PAR_BUFFER[s])==='yellow');
+  if(redSkus.length||yellowSkus.length){
+    let msg='';
+    if(redSkus.length) msg+=`<strong>${redSkus.map(s=>SKU_NAMES[s]).join(', ')}</strong> — produce now`;
+    if(redSkus.length&&yellowSkus.length) msg+=' &nbsp;·&nbsp; ';
+    if(yellowSkus.length) msg+=`<strong>${yellowSkus.map(s=>SKU_NAMES[s]).join(', ')}</strong> — running low`;
+    document.getElementById('alert-area').innerHTML=`<div class="alert-banner"><div><div class="alert-title">⚠️ Production Alert — ${redSkus.length+yellowSkus.length} SKU${redSkus.length+yellowSkus.length>1?'s':''} need attention</div><div class="alert-sub">${msg}</div></div></div>`;
+  } else {
+    document.getElementById('alert-area').innerHTML='';
+  }
+
+  // PAR cards
+  document.getElementById('par-grid').innerHTML = SKU_ORDER.map(sku => {
+    const oh=ON_HAND[sku], com=COMMITTED[sku], avail=oh-com, par=PAR_BUFFER[sku];
+    const need=Math.max(0,par-avail), c=cls(avail,par), pct=Math.min(100,Math.round(Math.max(0,avail)/par*100));
+    return `<div class="par-card ${c}">
+      <div class="par-badge">${badge(avail,par)}</div>
+      <div class="par-name">${SKU_NAMES[sku]}</div>
+      <div class="par-sku">${sku}</div>
+      <div class="par-oh-row"><div class="par-oh">${avail}</div><div class="par-of">/ ${par} PAR</div></div>
+      <div class="par-meta">${oh} on hand &minus; <strong>${com}</strong> committed</div>
+      <div class="par-bar-bg"><div class="par-bar-fill" style="width:${pct}%"></div></div>
+      <div class="par-action">${need>0?'▲ Produce '+need+' cases':'✓ No production needed'}</div>
+    </div>`;
+  }).join('');
+
+  // PAR table
+  document.getElementById('par-table').innerHTML = SKU_ORDER.map(sku => {
+    const oh=ON_HAND[sku],com=COMMITTED[sku],avail=oh-com,par=PAR_BUFFER[sku],need=Math.max(0,par-avail),c=cls(avail,par);
+    const pillCls=need>0?(avail<0?'pill-red':'pill-yellow'):'pill-green';
+    return `<tr>
+      <td><strong style="font-size:14px">${SKU_NAMES[sku]}</strong> <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b7280;margin-left:6px">${sku}</span></td>
+      <td class="r">${oh}</td>
+      <td class="r" style="color:#b91c1c;font-weight:600">${com}</td>
+      <td class="r" style="font-weight:700;color:${cMap[c]}">${avail}</td>
+      <td class="r" style="color:#6b7280">${par}</td>
+      <td class="r"><span class="pill ${pillCls}">${need>0?need+' cases':'✓ Good'}</span></td>
     </tr>`;
+  }).join('');
+}
+
+function renderOrders(rows, hasData, COMMITTED) {
+  if(!hasData) {
+    // Fall back to hardcoded open orders
+    rows = [
+      {['PO Number']:'29223280',Region:'INTERMOUNTAIN',['Delivery Date']:'2026-06-19',Cases:'75',Ciabatta:'50',['Pretzel Roll']:'0',['Dutch Crunch']:'0',['LG Sourdough']:'25',['SM Sourdough']:'0'},
+      {['PO Number']:'39394060',Region:'ATLANTA',['Delivery Date']:'2026-06-25',Cases:'125',Ciabatta:'0',['Pretzel Roll']:'50',['Dutch Crunch']:'50',['LG Sourdough']:'0',['SM Sourdough']:'25'},
+      {['PO Number']:'30041070',Region:'CENTRAL TEXAS',['Delivery Date']:'2026-06-24',Cases:'375',Ciabatta:'200',['Pretzel Roll']:'50',['Dutch Crunch']:'50',['LG Sourdough']:'50',['SM Sourdough']:'25'},
+      {['PO Number']:'46580300',Region:'LA',['Delivery Date']:'2026-06-23',Cases:'500',Ciabatta:'250',['Pretzel Roll']:'50',['Dutch Crunch']:'50',['LG Sourdough']:'100',['SM Sourdough']:'50'},
+      {['PO Number']:'40661590',Region:'NORTH TEXAS',['Delivery Date']:'2026-06-26',Cases:'200',Ciabatta:'150',['Pretzel Roll']:'0',['Dutch Crunch']:'0',['LG Sourdough']:'50',['SM Sourdough']:'0'},
+      {['PO Number']:'29276010',Region:'INTERMOUNTAIN',['Delivery Date']:'2026-07-03',Cases:'75',Ciabatta:'0',['Pretzel Roll']:'0',['Dutch Crunch']:'50',['LG Sourdough']:'0',['SM Sourdough']:'25'},
+    ];
+  }
+  let tot={cases:0,ciab:0,pre:0,dc:0,lgs:0,sms:0};
+  const orderHTML = rows.map(r => {
+    const cases=parseInt(r['Cases']||0),ciab=parseInt(r['Ciabatta']||0),pre=parseInt(r['Pretzel Roll']||0),
+          dc=parseInt(r['Dutch Crunch']||0),lgs=parseInt(r['LG Sourdough']||0),sms=parseInt(r['SM Sourdough']||0);
+    tot.cases+=cases;tot.ciab+=ciab;tot.pre+=pre;tot.dc+=dc;tot.lgs+=lgs;tot.sms+=sms;
+    const del=r['Delivery Date'], d=daysUntil(del);
+    return `<tr>
+      <td class="po">${r['PO Number']}</td>
+      <td><span class="region">${r['Region']}</span></td>
+      <td><span class="del ${urgCls(del)}">${fmtDate(del)}</span><span class="chip ${chipCls(del)}">${d}d away</span></td>
+      <td class="r" style="font-weight:600">${cases}</td>
+      ${numCell(ciab)}${numCell(pre)}${numCell(dc)}${numCell(lgs)}${numCell(sms)}
+    </tr>`;
+  }).join('');
+  document.getElementById('orders-table').innerHTML = orderHTML + `
+    <tr class="total-row">
+      <td colspan="3"><span class="total-label">Total Committed</span></td>
+      <td class="r">${tot.cases}</td><td class="r">${tot.ciab}</td><td class="r">${tot.pre}</td>
+      <td class="r">${tot.dc}</td><td class="r">${tot.lgs}</td><td class="r">${tot.sms}</td>
+    </tr>`;
+}
+
+function renderInventory(rows, hasData, ON_HAND) {
+  // Summary cards
+  document.getElementById('inv-grid').innerHTML = SKU_ORDER.map(sku => {
+    const total=ON_HAND[sku], c=cls(total-0, PAR_BUFFER[sku]);
+    const lots = hasData ? [...new Set(rows.filter(r=>r['SKU']===sku).map(r=>r['Lot Number']))].length : '?';
+    return `<div class="inv-card ${c}">
+      <div class="inv-name">${SKU_NAMES[sku]}</div>
+      <div class="inv-qty">${total}</div>
+      <div class="inv-detail">${lots} lot${lots!==1?'s':''} · PAR buffer ${PAR_BUFFER[sku]}</div>
+    </div>`;
+  }).join('');
+
+  // Detail table
+  if(!hasData){ document.getElementById('inv-table').innerHTML='<tr><td colspan="6" style="padding:20px;color:#6b7280;text-align:center">No inventory data yet — waiting for Zapier to sync</td></tr>'; return; }
+  let html='';
+  SKU_ORDER.forEach(sku => {
+    const skuRows=rows.filter(r=>r['SKU']===sku);
+    skuRows.forEach((r,i) => {
+      html+=`<tr>
+        ${i===0?`<td rowspan="${skuRows.length}" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#374151;vertical-align:top;padding-top:14px;border-right:1px solid #f0f2f5">${sku}</td>
+        <td rowspan="${skuRows.length}" style="font-weight:700;font-size:14px;vertical-align:top;padding-top:14px;border-right:1px solid #f0f2f5">${SKU_NAMES[sku]}</td>`:''}
+        <td class="r" style="font-weight:700">${r['Units']}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;font-size:13px">${r['Lot Number']}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#374151">${fmtDate(r['Receipt Date'])}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;font-size:13px">${r['Location']}</td>
+      </tr>`;
+    });
   });
-});
-document.getElementById('inv-table').innerHTML = invRows;
+  document.getElementById('inv-table').innerHTML = html || '<tr><td colspan="6" style="padding:20px;color:#6b7280;text-align:center">No inventory rows found</td></tr>';
+}
 
-// ── SHIPPED TABLE ────────────────────────────────────────────
-const SHIPPED = [
-  {ref:'LA60926',   po:'46529180',city:'Walnut, CA',        date:'2026-06-05',qty:575,skus:{'F-CBCCIAB-BX':350,'F-CBCDC-BX':50,'F-CBCPRE-BX':50,'F-CBCSDLGL-S':100,'F-CBCSDSML-S':25}},
-  {ref:'EMD60526',  po:'28892890',city:'Pocomoke, MD',      date:'2026-06-04',qty:100,skus:{'F-CBCCIAB-BX':100}},
-  {ref:'EMD61226',  po:'28916360',city:'Pocomoke, MD',      date:'2026-06-04',qty:100,skus:{'F-CBCCIAB-BX':50,'F-CBCSDLGL-S':25,'F-CBCSDSML-S':25}},
-  {ref:'EMD61926-1',po:'28940730',city:'Pocomoke, MD',      date:'2026-06-04',qty:100,skus:{'F-CBCCIAB-BX':50,'F-CBCPRE-BX':50}},
-  {ref:'SEA60526',  po:'33391770',city:'Kent, WA',          date:'2026-06-05',qty:50, skus:{'F-CBCCIAB-BX':50}},
-  {ref:'SEA605261', po:'33389570',city:'Kent, WA',          date:'2026-06-05',qty:50, skus:{'F-CBCCIAB-BX':50}},
-  {ref:'CTX60326-2',po:'29953920',city:'New Braunfels, TX', date:'2026-06-08',qty:125,skus:{'F-CBCCIAB-BX':100,'F-CBCSDLGL-S':25}},
-  {ref:'NTX60526',  po:'40573900',city:'Lewisville, TX',    date:'2026-06-08',qty:175,skus:{'F-CBCCIAB-BX':100,'F-CBCDC-BX':50,'F-CBCSDLGL-S':25}},
-  {ref:'NTX61226-1',po:'40603440',city:'Lewisville, TX',    date:'2026-06-08',qty:25, skus:{'F-CBCSDLGL-S':25}},
-  {ref:'NTX61926',  po:'40627590',city:'Lewisville, TX',    date:'2026-06-08',qty:125,skus:{'F-CBCCIAB-BX':50,'F-CBCPRE-BX':50,'F-CBCSDLGL-S':25}},
-  {ref:'DEN60926',  po:'30163920',city:'Denver, CO',        date:'2026-06-10',qty:100,skus:{'F-CBCDC-BX':50,'F-CBCSDLGL-S':25,'F-CBCSDSML-S':25}},
-];
+function renderShipped(rows) {
+  if(!rows.length){ document.getElementById('shipped-table').innerHTML='<tr><td colspan="6" style="padding:20px;color:#6b7280;text-align:center">No shipped orders yet — waiting for Zapier to sync</td></tr>'; return; }
+  document.getElementById('shipped-table').innerHTML = rows.map(r => {
+    const chips = [['Ciabatta','Ciabatta'],['Pretzel Roll','Pretzel Roll'],['Dutch Crunch','Dutch Crunch'],['LG Sourdough','LG Sourdough'],['SM Sourdough','SM Sourdough']]
+      .filter(([k])=>parseInt(r[k]||0)>0)
+      .map(([k,n])=>`<span class="sku-chip">${n} <strong>${r[k]}</strong></span>`).join('');
+    return `<tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#374151">${r['Reference']}</td>
+      <td class="po">${r['PO Number']}</td>
+      <td style="font-weight:600;font-size:14px">${r['Ship To City']}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#374151">${fmtDate(r['Pickup Date'])}</td>
+      <td class="r" style="font-weight:700">${r['Total Qty']}</td>
+      <td><div class="chips">${chips}</div></td>
+    </tr>`;
+  }).join('');
+}
 
-document.getElementById('shipped-table').innerHTML = SHIPPED.map(s => {
-  const chips=Object.entries(s.skus).map(([sku,qty])=>`<span class="sku-chip">${SKU_NAMES[sku]} <strong>${qty}</strong></span>`).join('');
-  return `<tr>
-    <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#374151">${s.ref}</td>
-    <td class="po">${s.po}</td>
-    <td style="font-weight:600;font-size:14px">${s.city}</td>
-    <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#374151">${fmtDate(s.date)}</td>
-    <td class="r" style="font-weight:700">${s.qty}</td>
-    <td><div class="chips">${chips}</div></td>
-  </tr>`;
-}).join('');
-
-// ── TAB NAVIGATION ───────────────────────────────────────────
 function show(name,el){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('view-'+name).classList.add('active');
   el.classList.add('active');
 }
+
+// Load on start
+loadDashboard();
 </script>
 </body>
 </html>
