@@ -96,6 +96,7 @@ td.dim{color:#9ca3af}
     <div class="tab" onclick="show('orders',this)">Open Orders</div>
     <div class="tab" onclick="show('inventory',this)">Inventory</div>
     <div class="tab" onclick="show('shipped',this)">Shipped</div>
+    <div class="tab" onclick="show('primetime',this)">PrimeTime</div>
   </nav>
   <div class="updated" id="last-updated">Loading...</div>
 </header>
@@ -139,7 +140,29 @@ td.dim{color:#9ca3af}
     </table></div>
   </div>
 
-  <div class="view" id="view-shipped">
+  <div class="view" id="view-primetime">
+    <div class="sec">PrimeTime Cold Storage — Full SRB Inventory · Jun 22, 2026</div>
+
+    <!-- Summary cards -->
+    <div id="pt-summary-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px"></div>
+
+    <!-- Full table -->
+    <div class="sec">All SKUs — Lot Detail</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>SKU</th>
+          <th>Product</th>
+          <th class="r">Total Available</th>
+          <th class="r">Lots</th>
+          <th>Oldest Receipt</th>
+          <th>Most Recent Receipt</th>
+          <th>Status</th>
+        </tr></thead>
+        <tbody id="pt-table"></tbody>
+      </table>
+    </div>
+  </div>
     <div class="sec">Shipped Orders</div>
     <div class="table-wrap"><table>
       <thead><tr>
@@ -384,8 +407,86 @@ function show(name,el){
   el.classList.add('active');
 }
 
+// ── PRIMETIME — live from Google Sheet ───────────────────────
+const SKU_FRIENDLY = {
+  'CALI RAYS SD':'Cali Rays Baguettes',
+  'CALI R BOULES':'Cali Rays Boules',
+  'SYSCO':'Sysco',
+  'F-ASTRDR-BX':"Asst'd Diner Rolls (96ct)",
+  'F-BRI-BX':'Brioche Loaf (5ct)',
+  'F-BRIB-BX':'Brioche Bun (48ct)',
+  'C-16RSTIPC .':'Colors 16" Rustic Pizza Crust (18ct)',
+  'CD FOODS':'CD Foods',
+  'F-ASTPDR-B':"Asst'd Petite Diner Rolls",
+  'F-POTBB-SE':'Potato Bun',
+  'WORLDWIDE':'Worldwide',
+};
+
+async function loadPrimeTime() {
+  try {
+    const rows = await fetchSheet('PrimeTime');
+    const totals={}, lots={}, oldest={}, newest={};
+    rows.forEach(r => {
+      const sku=(r['Sku']||'').trim();
+      const qty=parseInt(r['PrimaryAvailable']||0);
+      const lot=(r['LotNumber']||'').trim();
+      const date=(r['ReceiptDate']||'').substring(0,10);
+      if(!sku) return;
+      totals[sku]=(totals[sku]||0)+qty;
+      if(!lots[sku]) lots[sku]=new Set();
+      lots[sku].add(lot);
+      if(!oldest[sku]||date<oldest[sku]) oldest[sku]=date;
+      if(!newest[sku]||date>newest[sku]) newest[sku]=date;
+    });
+
+    const skus=Object.keys(totals).sort((a,b)=>totals[b]-totals[a]);
+    const totalUnits=skus.reduce((s,k)=>s+totals[k],0);
+    const inStock=skus.filter(k=>totals[k]>0).length;
+    const outOfStock=skus.filter(k=>totals[k]===0).length;
+
+    document.getElementById('pt-summary-grid').innerHTML=`
+      <div class="inv-card" style="border-left-color:#2563eb">
+        <div class="inv-name">Total Units on Hand</div>
+        <div class="inv-qty" style="color:#2563eb">${totalUnits.toLocaleString()}</div>
+        <div class="inv-detail">Across all SKUs</div>
+      </div>
+      <div class="inv-card" style="border-left-color:#22c55e">
+        <div class="inv-name">SKUs In Stock</div>
+        <div class="inv-qty" style="color:#15803d">${inStock}</div>
+        <div class="inv-detail">Active products</div>
+      </div>
+      <div class="inv-card" style="border-left-color:#ef4444">
+        <div class="inv-name">SKUs Out of Stock</div>
+        <div class="inv-qty" style="color:#b91c1c">${outOfStock}</div>
+        <div class="inv-detail">Zero available</div>
+      </div>
+      <div class="inv-card" style="border-left-color:#6b7280">
+        <div class="inv-name">Total SKUs Tracked</div>
+        <div class="inv-qty" style="color:#374151">${skus.length}</div>
+        <div class="inv-detail">All products at PrimeTime</div>
+      </div>`;
+
+    document.getElementById('pt-table').innerHTML=skus.map(sku=>{
+      const qty=totals[sku], instock=qty>0;
+      const bg=instock?'#dcfce7':'#fee2e2', color=instock?'#15803d':'#b91c1c', border=instock?'#86efac':'#fca5a5';
+      return `<tr>
+        <td style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#374151">${sku}</td>
+        <td style="font-weight:600;font-size:14px">${SKU_FRIENDLY[sku]||sku}</td>
+        <td class="r" style="font-weight:700;font-size:16px;color:${color}">${qty.toLocaleString()}</td>
+        <td class="r">${lots[sku]?lots[sku].size:0}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#374151">${fmtDate(oldest[sku]||'')}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#374151">${fmtDate(newest[sku]||'')}</td>
+        <td><span style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;background:${bg};color:${color};border:1px solid ${border}">${instock?'In Stock':'Out of Stock'}</span></td>
+      </tr>`;
+    }).join('');
+  } catch(e) {
+    document.getElementById('pt-summary-grid').innerHTML='<div style="padding:20px;color:#b91c1c">⚠️ Could not load PrimeTime data from Sheet</div>';
+  }
+}
+
 // Load on start
 loadDashboard();
+loadPrimeTime();
 </script>
 </body>
 </html>
