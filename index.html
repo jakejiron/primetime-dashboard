@@ -229,18 +229,40 @@ async function loadDashboard() {
       fetchSheet('Shipped')
     ]);
 
-    // Aggregate inventory by SKU
+    // Find most recent Last Updated date in inventory
+    const latestDate = invRows.reduce((max, r) => {
+      const d = r['Last Updated'] || '';
+      return d > max ? d : max;
+    }, '');
+
+    // Filter inventory to only most recent snapshot
+    const currentInv = latestDate 
+      ? invRows.filter(r => (r['Last Updated']||'') === latestDate)
+      : invRows;
+
+    // Aggregate inventory by SKU (current snapshot only)
     const ON_HAND = {};
     SKU_ORDER.forEach(s => ON_HAND[s] = 0);
-    invRows.forEach(r => {
+    currentInv.forEach(r => {
       if(r['SKU'] && ON_HAND[r['SKU']] !== undefined)
         ON_HAND[r['SKU']] += parseInt(r['Units']||0);
     });
 
+    // Find most recent open orders date
+    const latestOrderDate = orderRows.reduce((max, r) => {
+      const d = r['Last Updated'] || '';
+      return d > max ? d : max;
+    }, '');
+
+    // Filter open orders to most recent snapshot
+    const currentOrders = latestOrderDate
+      ? orderRows.filter(r => (r['Last Updated']||'') === latestOrderDate)
+      : orderRows;
+
     // Aggregate committed from open orders
     const COMMITTED = {};
     SKU_ORDER.forEach(s => COMMITTED[s] = 0);
-    orderRows.forEach(r => {
+    currentOrders.forEach(r => {
       COMMITTED['F-CBCCIAB-BX'] += parseInt(r['Ciabatta']||0);
       COMMITTED['F-CBCPRE-BX']  += parseInt(r['Pretzel Roll']||0);
       COMMITTED['F-CBCDC-BX']   += parseInt(r['Dutch Crunch']||0);
@@ -249,24 +271,24 @@ async function loadDashboard() {
     });
 
     // If sheet is empty, fall back to last known data
-    const hasInv = invRows.length > 0;
+    const hasInv = currentInv.length > 0;
     if(!hasInv) {
-      ON_HAND['F-CBCCIAB-BX']=950; ON_HAND['F-CBCPRE-BX']=250;
-      ON_HAND['F-CBCDC-BX']=0; ON_HAND['F-CBCSDLGL-S']=525; ON_HAND['F-CBCSDSML-S']=125;
+      ON_HAND['F-CBCCIAB-BX']=750; ON_HAND['F-CBCPRE-BX']=200;
+      ON_HAND['F-CBCDC-BX']=100; ON_HAND['F-CBCSDLGL-S']=500; ON_HAND['F-CBCSDSML-S']=125;
     }
-    const hasOrders = orderRows.length > 0;
+    const hasOrders = currentOrders.length > 0;
     if(!hasOrders) {
       COMMITTED['F-CBCCIAB-BX']=650; COMMITTED['F-CBCPRE-BX']=150;
       COMMITTED['F-CBCDC-BX']=200; COMMITTED['F-CBCSDLGL-S']=225; COMMITTED['F-CBCSDSML-S']=125;
     }
 
     renderPAR(ON_HAND, COMMITTED);
-    renderOrders(orderRows, hasOrders, COMMITTED);
-    renderInventory(invRows, hasInv, ON_HAND);
+    renderOrders(currentOrders, hasOrders, COMMITTED);
+    renderInventory(currentInv, hasInv, ON_HAND, latestDate);
     renderShipped(shippedRows);
 
     document.getElementById('last-updated').textContent = 
-      'Updated: ' + new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+      'Data as of: ' + (latestDate || new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}));
 
   } catch(e) {
     console.error(e);
@@ -352,7 +374,7 @@ function renderOrders(rows, hasData, COMMITTED) {
     </tr>`;
 }
 
-function renderInventory(rows, hasData, ON_HAND) {
+function renderInventory(rows, hasData, ON_HAND, latestDate) {
   // Summary cards
   document.getElementById('inv-grid').innerHTML = SKU_ORDER.map(sku => {
     const total=ON_HAND[sku], c=cls(total-0, PAR_BUFFER[sku]);
