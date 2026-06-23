@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PrimeTime Inventory Production Dashboard — Sadie Rose Baking</title>
+<title>CBC Production Dashboard — Sadie Rose Baking Co.</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
@@ -90,7 +90,7 @@ td.dim{color:#9ca3af}
 <header>
   <div class="logo">SRB</div>
   <div class="hdiv"></div>
-  <div><div class="htitle">PrimeTime Inventory Dashboard</div><div class="hsub">SoCal Consolidation · PrimeTime Cold Storage</div></div>
+  <div><div class="htitle">CBC Production Dashboard</div><div class="hsub">SoCal Consolidation · PrimeTime Cold Storage</div></div>
   <nav>
     <div class="tab active" onclick="show('production',this)">Production / PAR</div>
     <div class="tab" onclick="show('orders',this)">Open Orders</div>
@@ -209,13 +209,24 @@ async function fetchSheet(tabName) {
 // ── HELPERS ──────────────────────────────────────────────────
 function cls(avail, par){ return avail>=par?'green':avail>=par*0.5?'yellow':'red'; }
 function badge(avail, par){ return avail>=par?'At PAR':avail>=par*0.5?'Running Low':'Produce Now'; }
-function fmtDate(d){ 
-  if(!d) return '—';
+function parseDate(d) {
+  if(!d) return null;
+  // Handle Google Sheets JSON format: Date(2026,5,5) — months are 0-indexed
+  const match = String(d).match(/Date\((\d+),(\d+),(\d+)\)/);
+  if(match) return new Date(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]));
   const dt = new Date(d);
-  if(isNaN(dt)) return d;
+  return isNaN(dt) ? null : dt;
+}
+function fmtDate(d) {
+  const dt = parseDate(d);
+  if(!dt) return '—';
   return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][dt.getMonth()]+' '+dt.getDate();
 }
-function daysUntil(d){ return Math.ceil((new Date(d)-new Date())/864e5); }
+function daysUntil(d){ 
+  const dt = parseDate(d);
+  if(!dt) return 999;
+  return Math.ceil((dt - new Date())/864e5); 
+}
 function urgCls(d){ const n=daysUntil(d); return n<=7?'urgent':n<=14?'soon':'ok'; }
 function chipCls(d){ const n=daysUntil(d); return n<=7?'chip-urgent':n<=14?'chip-soon':'chip-ok'; }
 function numCell(v){ return v&&v!='0'?`<td class="r">${v}</td>`:`<td class="r dim">—</td>`; }
@@ -262,14 +273,14 @@ async function loadDashboard() {
     const today = new Date(); today.setHours(0,0,0,0);
     const currentOrders = latestOrderDate
       ? orderRows.filter(r => {
-          const delDate = new Date(r['Delivery Date'] || '');
+          const delDate = parseDate(r['Delivery Date'] || '');
           const notShipped = !shippedPOs.has(String(r['PO Number'] || '').trim());
           const isLatest = (r['Last Updated'] || '').trim().substring(0,10) === latestOrderDate;
-          return isLatest && notShipped && !isNaN(delDate) && delDate >= today;
+          return isLatest && notShipped && delDate && delDate >= today;
         })
       : orderRows.filter(r => {
-          const delDate = new Date(r['Delivery Date'] || '');
-          return !isNaN(delDate) && delDate >= today && !shippedPOs.has(String(r['PO Number'] || '').trim());
+          const delDate = parseDate(r['Delivery Date'] || '');
+          return delDate && delDate >= today && !shippedPOs.has(String(r['PO Number'] || '').trim());
         });
 
     // Aggregate committed from open orders
