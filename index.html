@@ -231,13 +231,13 @@ async function loadDashboard() {
 
     // Find most recent Last Updated date in inventory
     const latestDate = invRows.reduce((max, r) => {
-      const d = r['Last Updated'] || '';
+      const d = (r['Last Updated'] || '').trim().substring(0, 10);
       return d > max ? d : max;
     }, '');
 
     // Filter inventory to only most recent snapshot
-    const currentInv = latestDate 
-      ? invRows.filter(r => (r['Last Updated']||'') === latestDate)
+    const currentInv = latestDate
+      ? invRows.filter(r => (r['Last Updated'] || '').trim().substring(0, 10) === latestDate)
       : invRows;
 
     // Aggregate inventory by SKU (current snapshot only)
@@ -250,14 +250,25 @@ async function loadDashboard() {
 
     // Find most recent open orders date
     const latestOrderDate = orderRows.reduce((max, r) => {
-      const d = r['Last Updated'] || '';
+      const d = (r['Last Updated'] || '').trim().substring(0, 10);
       return d > max ? d : max;
     }, '');
 
-    // Filter open orders to most recent snapshot
+    // Get all PO numbers that have already shipped
+    const shippedPOs = new Set(shippedRows.map(r => (r['PO Number'] || '').trim()));
+
+    // Filter open orders to most recent snapshot AND future/today delivery dates AND not already shipped
+    const today = new Date().toISOString().substring(0, 10);
     const currentOrders = latestOrderDate
-      ? orderRows.filter(r => (r['Last Updated']||'') === latestOrderDate)
-      : orderRows;
+      ? orderRows.filter(r => 
+          (r['Last Updated'] || '').trim().substring(0, 10) === latestOrderDate && 
+          (r['Delivery Date'] || '') >= today &&
+          !shippedPOs.has((r['PO Number'] || '').trim())
+        )
+      : orderRows.filter(r => 
+          (r['Delivery Date'] || '') >= today &&
+          !shippedPOs.has((r['PO Number'] || '').trim())
+        );
 
     // Aggregate committed from open orders
     const COMMITTED = {};
